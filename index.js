@@ -20,7 +20,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.get('/', function (req, res) {
     var html = Handlebars.compile(fs.readFileSync('./index.html', 'utf8'))();
     res.send(html)
-    
 })
 
 app.get('/profiles', function (req, res) {
@@ -51,7 +50,6 @@ app.post('/profiles', function (req, res) {
         if (err) return res.status(err.code || err.status || 500).send(err)
         res.status(200).send(response)
     })
-
 })
 app.get('/profiles/:profileId', function (req, res) {
     var query = 'SELECT * FROM profiles WHERE id    =' + req.params.profileId
