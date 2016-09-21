@@ -6,10 +6,6 @@ const fs = require('fs')
 const sqlite = require('sqlite3').verbose()
 var db = new sqlite.Database('my_db.db')
 
-Handlebars.registerHelper('json', function (context) {
-    return JSON.stringify(contet);
-});
-
 db.serialize(function () {
     var query = 'CREATE TABLE if not exists profiles (id INTEGER NOT NULL PRIMARY KEY, name varchar, bio varchar, fb_id varchar)'
     db.run(query, function (err, response) {
@@ -17,17 +13,15 @@ db.serialize(function () {
     });
 })
 
+app.use(express.static(__dirname + '/'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
 app.get('/', function (req, res) {
     var html = Handlebars.compile(fs.readFileSync('./index.html', 'utf8'))();
     res.send(html)
     
 })
-
-
-app.use(express.static(__dirname + '/'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-
 
 app.get('/profiles', function (req, res) {
     var query = 'SELECT id,name from profiles'
@@ -104,7 +98,6 @@ app.delete('/profiles/:profileId', function(req,res){
         res.status(200).send(response)
     })
 })
-
 
 app.listen(3000, function () {
     console.log('listening on port 3000')
