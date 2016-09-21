@@ -51,32 +51,37 @@
 </div>
 
 <script>
-    $.ajax({
-        type: 'get',
-        url: '/profiles',
-        contentType: 'application/json',
-        success: function (response) {
-            var html = ''
-            var personColumn = ''
-            response.forEach(function (triplet) {
-                html += '<div class="row editPerson">'
-                triplet.forEach(function (person) {
-                    html += '<div class="col-xs-4">' +
-                            ' <span class="col-xs-8">' + person.name + ' </span>' +
-                            ' <button class="btn btn-danger col-xs-2" type="button" onclick="deleteProfile(\'' + person.id + '\')"> Delete </button>' +
-                            ' <button class="btn btn-info col-xs-2" type="button" data-toggle="modal" data-target="#editPersonModal" data-person=' + person.id + '> Edit </button>' +
-                            ' </div>'
+    function getAndRenderAllProfiles() {
+        $.ajax({
+            type: 'get',
+            url: '/profiles',
+            contentType: 'application/json',
+            success: function (response) {
+                var html = ''
+                response.forEach(function (triplet) {
+                    html += '<div class="row editPerson">'
+                    triplet.forEach(function (person) {
+                        html += '<div class="col-xs-4">' +
+                                ' <span class="col-xs-8">' + person.name + ' </span>' +
+                                ' <button class="btn btn-danger col-xs-2" type="button" onclick="deleteProfile(\'' + person.id + '\')"> Delete </button>' +
+                                ' <button class="btn btn-info col-xs-2" type="button" data-toggle="modal" data-target="#editPersonModal" data-person=' + person.id + '> Edit </button>' +
+                                ' </div>'
+                    })
+                    html += '</div>'
                 })
-                html += '</div>'
-            })
-            $('.allPeople').append(html)
-        }
-    })
+                $('.allPeople').html(html)
+            }
+        })
+    }
+    getAndRenderAllProfiles()
     function deleteProfile(profileId) {
         $.ajax({
             type: 'delete',
             url: '/profiles/' + profileId,
-            contentType: 'application/json'
+            contentType: 'application/json',
+            success: function(){
+                getAndRenderAllProfiles()
+            }
         })
     }
 
@@ -91,7 +96,10 @@
             type: 'post',
             data: JSON.stringify(data),
             url: '/profiles',
-            contentType: 'application/json'
+            contentType: 'application/json',
+            success: function(){
+                getAndRenderAllProfiles()
+            }
         })
     })
 
