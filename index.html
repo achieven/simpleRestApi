@@ -1,0 +1,138 @@
+<html>
+<head>
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <form id="postProfile" action="profiles" method="post" class="navbar-form">
+                <ul class="nav navbar-nav">
+                    <li><input type="text" class="form-control createdName" placeholder="name"></li>
+                    <li><input type="text" class="form-control createdBio" placeholder="bio"></li>
+                    <li><input type="text" class="form-control createdFb_id" placeholder="fb_id"></li>
+                    <li>
+                        <button class="btn btn-success" type='submit'>Create</button>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </nav>
+
+    <div class="allPeople"></div>
+</div>
+
+<div class="modal fade" id="editPersonModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <img class="picture">
+                <span class="nameAlongsidePicture">Edit {{this.nameAlongsidePicture}}</span>
+            </div>
+            <div class="modal-body">
+                <form id="editPerson" action="">
+                    <input type="text" class="form-control editName">
+                    <input type="text" class="form-control editBio">
+                    <input type="text" class="form-control editFb_id">
+                    <option class="hide personIdToSend" value={{this.id}}>{{this.id}}</option>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-info savePersonChanges">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $.ajax({
+        type: 'get',
+        url: '/profiles',
+        contentType: 'application/json',
+        success: function (response) {
+            var html = ''
+            var personColumn = ''
+            response.forEach(function (triplet) {
+                html += '<div class="row editPerson">'
+                triplet.forEach(function (person) {
+                    html += '<div class="col-xs-4">' +
+                            ' <span class="col-xs-8">' + person.name + ' </span>' +
+                            ' <button class="btn btn-danger col-xs-2" type="button" onclick="deleteProfile(\'' + person.id + '\')"> Delete </button>' +
+                            ' <button class="btn btn-info col-xs-2" type="button" data-toggle="modal" data-target="#editPersonModal" data-person=' + person.id + '> Edit </button>' +
+                            ' </div>'
+                })
+                html += '</div>'
+            })
+            $('.allPeople').append(html)
+        }
+    })
+    function deleteProfile(profileId) {
+        $.ajax({
+            type: 'delete',
+            url: '/profiles/' + profileId,
+            contentType: 'application/json'
+        })
+    }
+
+    $('#postProfile').on('submit', function (e) {
+        e.preventDefault();
+        var data = {
+            name: $('.createdName').val(),
+            bio: $('.createdBio').val(),
+            fb_id: $('.createdFb_id').val(),
+        };
+        $.ajax({
+            type: 'post',
+            data: JSON.stringify(data),
+            url: '/profiles',
+            contentType: 'application/json'
+        })
+    })
+
+    $('#editPersonModal').on('show.bs.modal', function (e) {
+        var id = $(e.relatedTarget).data('person')
+        $.ajax({
+            type: 'get',
+            url: '/profiles/' + id,
+            success: function (response) {
+                var oldPersonData = response[0]
+                $(e.currentTarget).find('.editName').val(oldPersonData.name)
+                $(e.currentTarget).find('.editBio').val(oldPersonData.bio)
+                $(e.currentTarget).find('.editFb_id').val(oldPersonData.fb_id)
+                $(e.currentTarget).find('.picture')[0].setAttribute('src', 'http://graph.facebook.com/' + oldPersonData.fb_id + '/picture')
+                $(e.currentTarget).find('.personIdToSend').val(oldPersonData.id)
+                $(e.currentTarget).find('.nameAlongSidePicture').text('Edit ' + oldPersonData.name)
+
+                $('#editPerson').on('submit', function (e) {
+                    var newName = $('.editName').val()
+                    var newBio = $('.editBio').val()
+                    var newFb_id = $('.editFb_id').val()
+                    var data = {}
+                    if (newName != oldPersonData.name) data.newName = newName
+                    if (newBio != oldPersonData.bio) data.newBio = newBio
+                    if (newFb_id != oldPersonData.fb_id) data.newFb_id = newFb_id
+                    if (!($.isEmptyObject(data))) {
+                        data.id = $('.personIdToSend').val()
+                        $.ajax({
+                            type: 'put',
+                            data: JSON.stringify(data),
+                            url: '/profiles/' + data.id,
+                            contentType: 'application/json'
+                        })
+                    }
+                })
+            }
+        })
+    })
+
+
+</script>
+
+</body>
+</html>
