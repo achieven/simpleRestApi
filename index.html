@@ -54,7 +54,7 @@
     function getAndRenderAllProfiles() {
         $.ajax({
             type: 'get',
-            url: '/profiles',
+            url: '/simplerestapi/profiles',
             contentType: 'application/json',
             success: function (response) {
                 var html = ''
@@ -77,7 +77,7 @@
     function deleteProfile(profileId) {
         $.ajax({
             type: 'delete',
-            url: '/profiles/' + profileId,
+            url: '/simplerestapi/profiles/' + profileId,
             contentType: 'application/json',
             success: function(){
                 getAndRenderAllProfiles()
@@ -95,7 +95,7 @@
         $.ajax({
             type: 'post',
             data: JSON.stringify(data),
-            url: '/profiles',
+            url: '/simplerestapi/profiles',
             contentType: 'application/json',
             success: function(){
                 getAndRenderAllProfiles()
@@ -107,7 +107,7 @@
         var id = $(e.relatedTarget).data('person')
         $.ajax({
             type: 'get',
-            url: '/profiles/' + id,
+            url: '/simplerestapi/profiles/' + id,
             success: function (response) {
                 var oldPersonData = response[0]
                 $(e.currentTarget).find('.editName').val(oldPersonData.name)
@@ -130,7 +130,7 @@
                         $.ajax({
                             type: 'put',
                             data: JSON.stringify(data),
-                            url: '/profiles/' + data.id,
+                            url: '/simplerestapi/profiles/' + data.id,
                             contentType: 'application/json'
                         })
                     }
